@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <style>
+    body {
+      margin: 0;
+    }
+
+    .zoomer {
+      border: 0 solid blue;
+    }
+
+    #os {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .label {
+      transition: opacity .5s;
+      position: absolute;
+      opacity: 0.9;
+    }
+
+    .label.focus {
+      opacity: 0;
+    }
+
+    line {
+      stroke: rgba(30, 30, 30, 0.3);
+      stroke-width: 1.1;
+    }
+
+    circle {
+      fill: #66CCF2;
+    }
+
+    text {
+      font-family: Arial;
+      font-size: 15px;
+      fill: #000;
+    }
+
+    svg:hover circle {
+      fill: #ccc;
+    }
+
+  </style>
+
+</head>
+<body>
+  
+  <div id="os"></div>
+
+  <script src="seadragon/openseadragon.js"></script>
+  <script>
+    var viewer = OpenSeadragon({
+      id: 'os',
+      prefixUrl: 'seadragon/images/',
+      showFullPageControl: false,
+      animationTime: 1.75,
+      zoomPerClick: 1,
+      tileSources: ['tiles/2015.1.35.xml']
+    });
+
+    var labels = [];
+
+    viewer.addHandler('zoom', function (info) {
+      var action = info.zoom < 1 ? 'remove' : 'add'
+      labels.forEach(function (label) {
+        label.classList[action]('focus');
+      });
+    });
+
+    viewer.addHandler('open', function () {
+
+      var vw = viewer.source.width,
+          vh = viewer.source.height / viewer.source.aspectRatio,
+          offset = 50;
+
+      var hotspots = [
+        { x1: 0, y1: 0, x2: offset, y2: offset },
+        { x1: vw, y1: 0, x2: vw - offset, y2: offset },
+        { x1: vw, y1: vh, x2: vw - offset, y2: vh - offset },
+        { x1: 0, y1: vh, x2: offset, y2: vh - offset },
+        { x1: 2300, y1: 900, x2: 2320, y2: 830 },
+        { x1: 4000, y1: 900, x2: 4000, y2: 800 },
+        { x1: 1600, y1: 1050, x2: 1600, y2: 1250 }
+      ];
+
+      labels = [];
+
+      var radius = 15;
+      var zoomDepth = 0.15;
+
+      hotspots.forEach(function (hotspot, index) {
+
+        var x1 = hotspot.x1, y1 = hotspot.y1,
+            x2 = hotspot.x2, y2 = hotspot.y2;
+
+        var height = Math.abs(y1 - y2),
+            width = Math.abs(x1 - x2);
+
+        var left = x1, 
+            top = y1;
+
+        var linePointingRight = x1 < x2,
+            linePointingDown = y1 < y2;
+        
+        if (!linePointingDown) top -= height;
+        if (!linePointingRight) left -= width;  
+        
+        height += radius * 2;
+        width += radius * 2;
+        top -= radius;
+        left -= radius;
+        
+        var cx = linePointingRight ? width - radius : 0 + radius,
+            cy = linePointingDown ? height - radius : 0 + radius;
+
+        var lineStartX = linePointingRight ? 0 : width,
+            lineStartY = linePointingDown ? 0 : height;
+
+        var label = document.createElementNS('http://www.w3.org/2000/svg', 'svg'),
+            line = document.createElementNS('http://www.w3.org/2000/svg', 'line'),
+            circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle'),
+            text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            
+        label.classList.add('label');
+        label.setAttribute('height', height);
+        label.setAttribute('width', width);
+
+        line.setAttribute('x1', lineStartX);
+        line.setAttribute('y1', lineStartY);
+        line.setAttribute('x2', cx);
+        line.setAttribute('y2', cy);  
+        label.appendChild(line);
+
+        circle.setAttribute('cx', cx);
+        circle.setAttribute('cy', cy);
+        circle.setAttribute('r', radius);
+        label.appendChild(circle);
+
+        text.setAttribute('x', cx);
+        text.setAttribute('y', cy + 5);
+        text.setAttribute('text-anchor', 'middle');
+        text.innerHTML = index + 1;
+        label.appendChild(text);
+
+        var rx = x1 / viewer.source.width,
+            ry = y1 / viewer.source.height;
+
+        var zoomBoundaries = new OpenSeadragon.Rect(
+          rx - (zoomDepth / 2),
+          ry - (zoomDepth / 2),
+          zoomDepth,
+          zoomDepth
+        );
+
+        label.addEventListener('click', function () {
+          viewer.viewport.fitBounds(zoomBoundaries);
+        });
+
+        var rect = new OpenSeadragon.Rect(rx, ry, width, height);
+
+        viewer.addOverlay(label, rect, 0, function (position, size, element) {
+          if (!linePointingRight) position.x -= width;
+          if (!linePointingDown) position.y -= height;
+          element.style.top = position.y + 'px';
+          element.style.left = position.x + 'px';
+        });
+
+        labels.push(label);
+
+      });
+      
+    });
+
+
+
+  </script>
+</body>
+</html>
