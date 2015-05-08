@@ -31,7 +31,7 @@
     .label {
       transition: opacity .5s;
       position: absolute;
-      opacity: 0.9;
+      opacity: 1;
       border: 1px solid orange;
     }
 
@@ -112,7 +112,7 @@
 
       labels = [];
 
-      var radius = 15;
+      var radius = 25;
       var zoomDepth = 0.15;
 
       hotspots.forEach(function (hotspot, index) {
@@ -202,8 +202,13 @@
         var rect = new OpenSeadragon.Rect(
           x1 / viewer.source.width,
           y1 / viewer.source.height / viewer.source.aspectRatio,
-          width,
-          height
+          width / viewer.source.width,
+          height / viewer.source.height / viewer.source.aspectRatio
+        );
+
+        console.log(
+          width / viewer.source.width,
+          height / viewer.source.height / viewer.source.aspectRatio
         );
 
         viewer.addOverlay(label, rect, 0, function (position, size, element) {
@@ -211,7 +216,6 @@
           if (!linePointingDown) position.y -= height;
           element.style.top = position.y + 'px';
           element.style.left = position.x + 'px';
-
         });
 
         labels.push(label);
