@@ -15,8 +15,8 @@
 
     .point {
       border: 1px solid red;
-      width: 25px;
-      height: 25px;
+      width: 10px;
+      height: 10px;
     }
 
     .zoomer {
@@ -37,11 +37,6 @@
 
     .label.focus {
       opacity: 0;
-    }
-
-    .point {
-      width: 10px;
-      height: 10px;
     }
 
     .point--start {
@@ -101,9 +96,11 @@
 
     viewer.addHandler('open', function () {
 
+      console.log(viewer);
+
       var vw = viewer.source.width,
           vh = viewer.source.height,
-          offset = 50;
+          offset = 150;
 
       var hotspots = [
         { x1: 0, y1: 0, x2: offset, y2: offset },
