@@ -184,6 +184,7 @@
         });
 
         
+        // These points are correct
         var start = new OpenSeadragon.Point(
           x2 / viewer.source.width,
           y2 / viewer.source.height / viewer.source.aspectRatio
@@ -197,18 +198,20 @@
         viewer.addOverlay(el('div', 'point point--start'), start, 0);
         viewer.addOverlay(el('div', 'point point--end'), end, 0);
 
+        // This rect points to the correct point, but the line grows far too fast.
         var rect = new OpenSeadragon.Rect(
           x1 / viewer.source.width,
           y1 / viewer.source.height / viewer.source.aspectRatio,
           width,
           height
-        )
+        );
 
         viewer.addOverlay(label, rect, 0, function (position, size, element) {
           if (!linePointingRight) position.x -= width;
           if (!linePointingDown) position.y -= height;
           element.style.top = position.y + 'px';
           element.style.left = position.x + 'px';
+
         });
 
         labels.push(label);
