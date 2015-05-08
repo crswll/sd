@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <title>Document</title>
   <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
     }
@@ -27,10 +32,24 @@
       transition: opacity .5s;
       position: absolute;
       opacity: 0.9;
+      border: 1px solid orange;
     }
 
     .label.focus {
       opacity: 0;
+    }
+
+    .point {
+      width: 10px;
+      height: 10px;
+    }
+
+    .point--start {
+      border: 1px solid red;
+    }
+
+    .point--end {
+      border: 1px solid blue;
     }
 
     line {
@@ -46,6 +65,7 @@
       font-family: Arial;
       font-size: 15px;
       fill: #000;
+      pointer-events: none;
     }
 
     svg:hover circle {
@@ -66,7 +86,8 @@
       prefixUrl: 'seadragon/images/',
       showFullPageControl: false,
       animationTime: 1.75,
-      zoomPerClick: 1,
+      zoomPerClick: 1.2,
+      immediateRender: true,
       tileSources: ['tiles/2015.1.35.xml']
     });
 
@@ -89,7 +110,6 @@
         { x1: vw, y1: 0, x2: vw - offset, y2: offset },
         { x1: vw, y1: vh, x2: vw - offset, y2: vh - offset },
         { x1: 0, y1: vh, x2: offset, y2: vh - offset },
-        { x1: 4000, y1: 900, x2: 4000, y2: 800 },
         { x1: 1600, y1: 1770, x2: 2000, y2: 1350 }
       ];
 
@@ -166,9 +186,28 @@
           viewer.viewport.fitBounds(zoomBoundaries);
         });
 
-        var point = new OpenSeadragon.Rect(rx, ry);
+        
+        var start = new OpenSeadragon.Point(
+          x2 / viewer.source.width,
+          y2 / viewer.source.height / viewer.source.aspectRatio
+        );
 
-        viewer.addOverlay(label, point, 0, function (position, size, element) {
+        var end = new OpenSeadragon.Point(
+          x1 / viewer.source.width,
+          y1 / viewer.source.height / viewer.source.aspectRatio
+        );
+
+        viewer.addOverlay(el('div', 'point point--start'), start, 0);
+        viewer.addOverlay(el('div', 'point point--end'), end, 0);
+
+        var rect = new OpenSeadragon.Rect(
+          x1 / viewer.source.width,
+          y1 / viewer.source.height / viewer.source.aspectRatio,
+          width,
+          height
+        )
+
+        viewer.addOverlay(label, rect, 0, function (position, size, element) {
           if (!linePointingRight) position.x -= width;
           if (!linePointingDown) position.y -= height;
           element.style.top = position.y + 'px';
