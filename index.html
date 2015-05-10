@@ -19,6 +19,15 @@
       height: 10px;
     }
 
+    .circle {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      line-height: 35px;
+      text-align: center;
+      background-color: rgba(170, 170, 170, 1);
+    }
+
     .zoomer {
       border: 0 solid blue;
     }
@@ -32,7 +41,6 @@
       transition: opacity .5s;
       position: absolute;
       opacity: 1;
-      border: 1px solid orange;
     }
 
     .label.focus {
@@ -47,23 +55,23 @@
       border: 1px solid blue;
     }
 
-    line {
-      stroke: rgba(30, 30, 30, 0.3);
-      stroke-width: 1.1;
+    .label line {
+      stroke: rgba(0, 0, 0, 1);
+      stroke-width: 1.2;
     }
 
-    circle {
+    .label circle {
       fill: #66CCF2;
     }
 
-    text {
+    .label text {
       font-family: Arial;
       font-size: 15px;
       fill: #000;
       pointer-events: none;
     }
 
-    svg:hover circle {
+    .label:hover circle {
       fill: #ccc;
     }
 
@@ -76,6 +84,7 @@
 
   <script src="seadragon/openseadragon.js"></script>
   <script>
+
     var viewer = OpenSeadragon({
       id: 'os',
       prefixUrl: 'seadragon/images/',
@@ -92,139 +101,85 @@
       return el;
     }
 
-    var labels = [];
-
     viewer.addHandler('open', function () {
 
-      console.log(viewer);
-
-      var vw = viewer.source.width,
-          vh = viewer.source.height,
-          offset = 150;
+      var viewerWidth = viewer.source.width,
+          viewerHeight = viewer.source.height,
+          aspectRatio = viewer.source.aspectRatio,
+          offset = 550;
 
       var hotspots = [
         { x1: 0, y1: 0, x2: offset, y2: offset },
-        { x1: vw, y1: 0, x2: vw - offset, y2: offset },
-        { x1: vw, y1: vh, x2: vw - offset, y2: vh - offset },
-        { x1: 0, y1: vh, x2: offset, y2: vh - offset },
-        { x1: 1600, y1: 1770, x2: 2000, y2: 1350 }
+        { x1: viewerWidth, y1: 0, x2: viewerWidth - offset, y2: offset },
+        { x1: viewerWidth, y1: viewerHeight, x2: viewerWidth - offset, y2: viewerHeight - offset },
+        { x1: 0, y1: viewerHeight, x2: offset, y2: viewerHeight - offset },
+        { x1: 1600, y1: 1770, x2: 2000, y2: 1150 }
       ];
 
-      labels = [];
-
-      var radius = 25;
       var zoomDepth = 0.15;
 
       hotspots.forEach(function (hotspot, index) {
 
-        var x1 = hotspot.x1, y1 = hotspot.y1,
-            x2 = hotspot.x2, y2 = hotspot.y2;
+        var x1 = hotspot.x1 / viewerWidth,
+            y1 = hotspot.y1 / viewerHeight / aspectRatio,
+            x2 = hotspot.x2 / viewerWidth,
+            y2 = hotspot.y2 / viewerHeight / aspectRatio;
 
-        var height = Math.abs(y1 - y2),
-            width = Math.abs(x1 - x2);
+        var start = new OpenSeadragon.Point(x2, y2),
+            end = new OpenSeadragon.Point(x1, y1);
 
-        var left = x1, 
-            top = y1;
+        var widthPx = Math.abs(hotspot.x1 - hotspot.x2),
+            heightPx = Math.abs(hotspot.y1 - hotspot.y2);
 
-        var linePointingRight = x1 < x2,
-            linePointingDown = y1 < y2;
-        
-        if (!linePointingDown) top -= height;
-        if (!linePointingRight) left -= width;  
-        
-        height += radius * 2;
-        width += radius * 2;
-        top -= radius;
-        left -= radius;
-        
-        var cx = linePointingRight ? width - radius : 0 + radius,
-            cy = linePointingDown ? height - radius : 0 + radius;
+        var width = Math.abs(x1 - x2),
+            height = Math.abs(y1 - y2);
 
-        var lineStartX = linePointingRight ? 0 : width,
-            lineStartY = linePointingDown ? 0 : height;
-
-        var label = document.createElementNS('http://www.w3.org/2000/svg', 'svg'),
-            line = document.createElementNS('http://www.w3.org/2000/svg', 'line'),
-            circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle'),
-            text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'),
+            line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             
-        label.classList.add('label');
-        label.setAttribute('height', height);
-        label.setAttribute('width', width);
+        // The line's container.
+        svg.classList.add('label');
+        svg.setAttribute('viewBox', [0, 0, widthPx, heightPx].join(' '));
+        svg.setAttribute('width', widthPx);
+        svg.setAttribute('height', heightPx);
 
-        line.setAttribute('x1', lineStartX);
-        line.setAttribute('y1', lineStartY);
-        line.setAttribute('x2', cx);
-        line.setAttribute('y2', cy);  
-        label.appendChild(line);
+        // Which direction should the line go?
+        line.setAttribute('x1', x1 > x2 ? 0 : widthPx);
+        line.setAttribute('y1', y1 > y2 ? 0 : heightPx);
+        line.setAttribute('x2', x1 < x2 ? 0 : widthPx);
+        line.setAttribute('y2', y1 < y2 ? 0 : heightPx);
+        svg.appendChild(line);
+        
+        // Adjusting the box to account for direction arrow is pointing.
+        var rect = new OpenSeadragon.Rect(
+          x1 > x2 ? x1 - width : x1,
+          y1 > y2 ? y1 - height : y1,
+          width,
+          height
+        );
 
-        circle.setAttribute('cx', cx);
-        circle.setAttribute('cy', cy);
-        circle.setAttribute('r', radius);
-        label.appendChild(circle);
-
-        text.setAttribute('x', cx);
-        text.setAttribute('y', cy + 5);
-        text.setAttribute('text-anchor', 'middle');
-        text.innerHTML = index + 1;
-        label.appendChild(text);
-
-        var rx = x1 / viewer.source.width,
-            ry = y1 / viewer.source.height / viewer.source.aspectRatio;
+        viewer.addOverlay(svg, rect, 0);
 
         var zoomBoundaries = new OpenSeadragon.Rect(
-          rx - (zoomDepth / 2),
-          ry - (zoomDepth / 2),
+          x1 - (zoomDepth / 2),
+          y1 - (zoomDepth / 2),
           zoomDepth,
           zoomDepth
         );
+
+        var circle = document.createElement('div');
+        circle.classList.add('circle');
+        circle.innerHTML = index + 1;
 
         circle.addEventListener('click', function () {
           viewer.viewport.fitBounds(zoomBoundaries);
         });
 
-        
-        // These points are correct
-        var start = new OpenSeadragon.Point(
-          x2 / viewer.source.width,
-          y2 / viewer.source.height / viewer.source.aspectRatio
-        );
-
-        var end = new OpenSeadragon.Point(
-          x1 / viewer.source.width,
-          y1 / viewer.source.height / viewer.source.aspectRatio
-        );
-
-        viewer.addOverlay(el('div', 'point point--start'), start, 0);
-        viewer.addOverlay(el('div', 'point point--end'), end, 0);
-
-        // This rect points to the correct point, but the line grows far too fast.
-        var rect = new OpenSeadragon.Rect(
-          x1 / viewer.source.width,
-          y1 / viewer.source.height / viewer.source.aspectRatio,
-          width / viewer.source.width,
-          height / viewer.source.height / viewer.source.aspectRatio
-        );
-
-        console.log(
-          width / viewer.source.width,
-          height / viewer.source.height / viewer.source.aspectRatio
-        );
-
-        viewer.addOverlay(label, rect, 0, function (position, size, element) {
-          if (!linePointingRight) position.x -= width;
-          if (!linePointingDown) position.y -= height;
-          element.style.top = position.y + 'px';
-          element.style.left = position.x + 'px';
-        });
-
-        labels.push(label);
+        viewer.addOverlay(circle, start, 0);        
 
       });
       
     });
-
-
 
   </script>
 </body>
