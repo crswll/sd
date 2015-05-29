@@ -75,6 +75,14 @@
       fill: #ccc;
     }
 
+    .text {
+      width: 300px;
+      padding: 10px;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      position: absolute;
+    }
+
   </style>
 
 </head>
@@ -113,7 +121,7 @@
         { x1: viewerWidth, y1: 0, x2: viewerWidth - offset, y2: offset },
         { x1: viewerWidth, y1: viewerHeight, x2: viewerWidth - offset, y2: viewerHeight - offset },
         { x1: 0, y1: viewerHeight, x2: offset, y2: viewerHeight - offset },
-        { x1: 1600, y1: 1770, x2: 2000, y2: 1150 }
+        { x1: 1600, y1: 1770, x2: 1900, y2: 1550 }
       ];
 
       var zoomDepth = 0.15;
@@ -158,6 +166,7 @@
           height
         );
 
+        // Add the line as an overlay...
         viewer.addOverlay(svg, rect, 0);
 
         var zoomBoundaries = new OpenSeadragon.Rect(
@@ -175,7 +184,15 @@
           viewer.viewport.fitBounds(zoomBoundaries);
         });
 
-        viewer.addOverlay(circle, start, 0);        
+        // Add the circle...
+        viewer.addOverlay(circle, start, 0);
+
+
+        var text = document.createElement('div');
+        text.classList.add('text');
+        text.innerHTML = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Excepturi, ipsam, distinctio. Error dignissimos aperiam dolorum, ea fugiat. Iure repellat minima, eligendi dolores in deserunt, maiores, ad doloribus quos, laudantium error.";
+
+        viewer.addOverlay(text, start, 1);
 
       });
       
