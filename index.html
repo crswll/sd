@@ -81,6 +81,14 @@
       background-color: rgba(0, 0, 0, 0.8);
       color: #fff;
       position: absolute;
+      opacity: 1;
+      pointer-events: none;
+      transition: opacity 0.5s;
+    }
+
+    .os--hide-labels .text {
+      opacity: 0;
+
     }
 
   </style>
@@ -97,7 +105,7 @@
       id: 'os',
       prefixUrl: 'seadragon/images/',
       showFullPageControl: false,
-      animationTime: 1.75,
+      animationTime: 0.75,
       zoomPerClick: 1.2,
       immediateRender: true,
       tileSources: ['tiles/2015.1.35.xml']
@@ -109,7 +117,20 @@
       return el;
     }
 
+
     viewer.addHandler('open', function () {
+
+      viewer.addHandler('zoom', function () {
+        var zoom = viewer.viewport.getZoom();
+        var element = viewer.element;
+        if (zoom < 3) {
+          element.classList.add('os--hide-labels');
+        } else {
+          element.classList.remove('os--hide-labels');
+        }
+      });
+
+      viewer.raiseEvent('zoom');
 
       var viewerWidth = viewer.source.width,
           viewerHeight = viewer.source.height,
@@ -117,14 +138,16 @@
           offset = 550;
 
       var hotspots = [
-        { x1: 0, y1: 0, x2: offset, y2: offset },
-        { x1: viewerWidth, y1: 0, x2: viewerWidth - offset, y2: offset },
-        { x1: viewerWidth, y1: viewerHeight, x2: viewerWidth - offset, y2: viewerHeight - offset },
-        { x1: 0, y1: viewerHeight, x2: offset, y2: viewerHeight - offset },
-        { x1: 1600, y1: 1770, x2: 1900, y2: 1550 }
+
+        // { x1: 0, y1: 0, x2: offset, y2: offset },
+        // { x1: viewerWidth, y1: 0, x2: viewerWidth - offset, y2: offset },
+        // { x1: viewerWidth, y1: viewerHeight, x2: viewerWidth - offset, y2: viewerHeight - offset },
+        // { x1: 0, y1: viewerHeight, x2: offset, y2: viewerHeight - offset },
+        { x1: 1600, y1: 1755, x2: 2000, y2: 1350 },
+        { x1: 1600, y1: 2255, x2: 2000, y2: 2550 }
       ];
 
-      var zoomDepth = 0.15;
+      var zoomDepth = 0.2;
 
       hotspots.forEach(function (hotspot, index) {
 
@@ -191,8 +214,8 @@
         var text = document.createElement('div');
         text.classList.add('text');
         text.innerHTML = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Excepturi, ipsam, distinctio. Error dignissimos aperiam dolorum, ea fugiat. Iure repellat minima, eligendi dolores in deserunt, maiores, ad doloribus quos, laudantium error.";
-
-        viewer.addOverlay(text, start, 1);
+        
+        viewer.addOverlay(text, start, 0);
 
       });
       
