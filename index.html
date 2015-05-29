@@ -123,7 +123,7 @@
       viewer.addHandler('zoom', function () {
         var zoom = viewer.viewport.getZoom();
         var element = viewer.element;
-        if (zoom < 3) {
+        if (zoom < 2.5) {
           element.classList.add('os--hide-labels');
         } else {
           element.classList.remove('os--hide-labels');
