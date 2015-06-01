@@ -57,7 +57,7 @@
 
     .label line {
       stroke: rgba(0, 0, 0, 1);
-      stroke-width: 1.2;
+      stroke-width: 1;
     }
 
     .label circle {
@@ -108,7 +108,7 @@
       animationTime: 0.75,
       zoomPerClick: 1.2,
       immediateRender: true,
-      tileSources: ['tiles/2015.1.35.xml']
+      tileSources: ['tiles/1917.303.xml']
     });
 
     var el = function (el, className) {
@@ -123,10 +123,10 @@
       viewer.addHandler('zoom', function () {
         var zoom = viewer.viewport.getZoom();
         var element = viewer.element;
-        if (zoom < 2.5) {
-          element.classList.add('os--hide-labels');
-        } else {
+        if (zoom > 1.3) {
           element.classList.remove('os--hide-labels');
+        } else {
+          element.classList.add('os--hide-labels');
         }
       });
 
@@ -138,16 +138,41 @@
           offset = 550;
 
       var hotspots = [
-
         // { x1: 0, y1: 0, x2: offset, y2: offset },
         // { x1: viewerWidth, y1: 0, x2: viewerWidth - offset, y2: offset },
         // { x1: viewerWidth, y1: viewerHeight, x2: viewerWidth - offset, y2: viewerHeight - offset },
         // { x1: 0, y1: viewerHeight, x2: offset, y2: viewerHeight - offset },
-        { x1: 1600, y1: 1755, x2: 2000, y2: 1350 },
-        { x1: 1600, y1: 2255, x2: 2000, y2: 2550 }
+        {
+          "x1": 950,
+          "y1": 2737, 
+          "x2": 633,
+          "y2": 2724,
+          "description": "In the 1600s, the opening of new maritime routes along the east and west coasts of Africa and the trading activities of the Netherlands West India Company led to a greater flow of African ivory into the hands of European sculptors."
+        },
+        {
+          "x1": 3153,
+          "y1": 2870, 
+          "x2": 3478,
+          "y2": 2875,
+          "description": "Ivory was both flexible and strong, making it an ideal material to reproduce musculature. Here you can also see how the artist incorporated the tougher, slightly darker outer layer of the tusk, called the cementum, into his carving."
+        },
+        {
+          "x1": 996,
+          "y1": 4879, 
+          "x2": 617,
+          "y2": 4891,
+          "description": "The artist made each of the animals unique, giving them almost human expressions—while the hare looks timid, the lion seems bored. He was also a master at reproducing different textures, from skin to leaves to feathers."
+        },
+        {
+          "x1": 2213,
+          "y1": 1295, 
+          "x2": 3251,
+          "y2": 783,
+          "description": "Notice how the snake, wrapping around the tree, transforms into a little boy, or putto. Looking down from the tree, he hands the forbidden fruit to Eve."
+        }
       ];
 
-      var zoomDepth = 0.2;
+      var zoomDepth = 0.35;
 
       hotspots.forEach(function (hotspot, index) {
 
@@ -213,7 +238,7 @@
 
         var text = document.createElement('div');
         text.classList.add('text');
-        text.innerHTML = "Ivory was both flexible and strong, making it an ideal material to reproduce musculature. Here you can also see how the artist incorporated the tougher, slightly darker outer layer of the tusk, called the cementum, into his carving.";
+        text.innerHTML = hotspot.description;
         viewer.addOverlay(text, start, 0);
 
       });
